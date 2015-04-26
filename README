@@ -1,0 +1,34 @@
+Programma per confrontare i nomi delle strade in OpenStreetMap con gli stradari comunali.
+
+Autore: Daniele Forsi <dforsi@gmail.com>
+Versione: 0.0.1
+Licenza: CC0 https://creativecommons.org/publicdomain/zero/1.0/deed.it
+
+== Limitazioni ==
+
+I tag delle way chiuse che sono outer di relazioni senza tag sono trasferiti sulle relazioni stesse e non è noto l'id delle way.
+Gli estratti in formato Spatialite possono contenere più di un confine perché sono ritagliati con un bounding box e questo programma non usa il corrispondente file .poly, per cui il file prodotto da questo programma con l'elenco delle strade dei Comuni che non sono oggetto dell'estratto può essere errato o incompleto.
+Il formato e il nome del file prodotto in output potrebbero cambiare nelle prossime versioni.
+
+== Installazione ==
+
+1. Installare i collegamenti alla libreria ogr per Python 3.
+
+Su sistemi debian-like ogr è nello stesso pacchetto di gdal:
+ apt-get install python3-gdal
+
+2. Copiare dove si vuole il file "compare.py" e la directory "reader".
+
+3. Scaricare i dati pubblicati da uno dei Comuni gestiti da questo programma (vedere nella directory "reader" per gli  indirizzi dei siti e le licenze) e copiarli dove il programma si aspetta di trovarli; il modo più semplice per saperlo è di eseguire il programma senza dati e leggere il nome del file nel messaggio di errore. Il programma cerca i dati a partire dalla directory corrente ed è possibile usare l'opzione della riga di comando --data-prefix per specificare un percorso diverso (deve terminare con una barra '/' se si riferisce a una directory).
+
+4. Scaricare l'estratto dei dati di OpenStreetMap in formato Spatialite (estensione .sqlite.zip) da http://osm-toolserver-italia.wmflabs.org/estratti/comuni/ e scompattarlo dove si vuole.
+
+5. Eseguire il file "compare.py" passando come argomento il nome del file spatialite scompattato al punto precedente (è possible passare più nomi di file). Verrà creato un file di testo UTF-8 separato da tabulazioni e con estensione ".tsv" per ogni confine con admin_level=8 contenuto nell'estratto. Il file .tsv può essere aperto con qualsiasi programma di foglio elettronico ed è composto da 4 colonne di testo seprate da tabulazioni (nell'ordine: id name osm_ids osm_name), le prime due colonne contengono i dati del Comune o sono vuote se il Comune non è gestito, la terza e la quarta colonna contengono i dati di OpenStreetMap con gli id delle way indicati dal prefisso 'w' (come w123), gli id delle relazioni indicati dal prefisso 'r' (come r456) e con id multipli separati da una virgola (come w123,r456).
+
+== Esempio di utilizzo ==
+
+BASENAME=Reggio_nell_Emilia---43415
+wget --timestamping "http://osm-toolserver-italia.wmflabs.org/estratti/comuni/sqlite/$BASENAME.sqlite.zip"
+unzip -o "$BASENAME.sqlite.zip" "$BASENAME.sqlite"
+./compare.py "$BASENAME.sqlite"
+a questo punto, nella directory corrente si troverà un file con le way per ogni confine trovato, nel caso in esempio Cavriago.tsv e Reggio nell'Emilia.tsv
